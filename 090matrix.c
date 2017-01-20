@@ -1,5 +1,3 @@
-// #include <stdio.h>
-// #include <math.h>
 
 /*** 2 x 2 Matrices ***/
 
@@ -71,19 +69,7 @@ coordinates. More precisely, the transformation first rotates through the angle
 theta (in radians, counterclockwise), and then translates by the vector (x, y).
 */
 void mat33Isometry(double theta, double x, double y, double isom[3][3]) {
-	double rotation[3][3] = {{cos(theta), -sin(theta), 0}, {sin(theta), cos(theta), 0}, {0, 0, 1}};
-	double translation[3][3] = {{1, 0, x}, {0, 1, y}, {0, 0, 1}};
+	double rotation[3][3] = {{cos(theta), -sin(theta), 0.0}, {sin(theta), cos(theta), 0.0}, {0.0, 0.0, 1.0}};
+	double translation[3][3] = {{1.0, 0.0, x}, {0.0, 1.0, y}, {0.0, 0.0, 1.0}};
 	mat333Multiply(translation, rotation, isom);
 }
-
-// int main(void) {
-// 	double m[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-// 	double n[3][3] = {{12, 7, 6}, {8, 0, 5}, {3, 2, 4}};
-// 	double v[3] = {2,3,4};
-// 	double mTimesN[3][3];
-// 	double mTimesV[3];
-//
-// 	mat33Isometry(1.0, 3.0, 2.0, mTimesN);
-// 	mat33Print(mTimesN);
-//
-// }

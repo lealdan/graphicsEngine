@@ -22,7 +22,7 @@ double getYOfLine(double x, double a[2], double slope) {
 */
 double slopeOf(double a[2], double b[2]) {
     if (a[0] == b[0]) {
-        printf("Infinite Error!\n\n");
+        return 9999999.0;
     }
     return (b[1] - a[1])/(b[0] - a[0]);
 }
@@ -144,7 +144,7 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                     getVary(a, b, c, (double)i, (double)j, ren, vary);
 
                     //Set pixel colors to the texture sample and some amount of rgb
-                    colorPixel(ren, unif, tex, vary, color);
+                    ren->colorPixel(ren, unif, tex, vary, color);
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -158,7 +158,7 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                     getVary(a, b, c, (double)i, (double)j, ren, vary);
 
                     //Set pixel colors to the texture sample and some amount of rgb
-                    colorPixel(ren, unif, tex, vary, color);
+                    ren->colorPixel(ren, unif, tex, vary, color);
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -172,7 +172,7 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                     getVary(a, b, c, (double)i, (double)j, ren, vary);
 
                     //Set pixel colors to the texture sample and some amount of rgb
-                    colorPixel(ren, unif, tex, vary, color);
+                    ren->colorPixel(ren, unif, tex, vary, color);
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -183,7 +183,7 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                     //Determine values of vary (chi/interpolation)
                     getVary(a, b, c, (double)k, (double)l, ren, vary);
                     //Set pixel colors to the texture sample and some amount of rgb
-                    colorPixel(ren, unif, tex, vary, color);
+                    ren->colorPixel(ren, unif, tex, vary, color);
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -200,7 +200,7 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                     getVary(a, b, c, (double)k, (double)l, ren, vary);
 
                     //Set pixel colors to the texture sample and some amount of rgb
-                    colorPixel(ren, unif, tex, vary, color);
+                    ren->colorPixel(ren, unif, tex, vary, color);
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -214,7 +214,7 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                     getVary(a, b, c, (double)i, (double)j, ren, vary);
 
                     //Set pixel colors to the texture sample and some amount of rgb
-                    colorPixel(ren, unif, tex, vary, color);
+                    ren->colorPixel(ren, unif, tex, vary, color);
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -226,7 +226,7 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                     getVary(a, b, c, (double)k, (double)l, ren, vary);
 
                     //Set pixel colors to the texture sample and some amount of rgb
-                    colorPixel(ren, unif, tex, vary, color);
+                    ren->colorPixel(ren, unif, tex, vary, color);
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }

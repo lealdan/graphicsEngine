@@ -145,9 +145,6 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     colorPixel(ren, unif, tex, vary, color);
-                    if ((vary[0] > 350 && vary[1] > 355.0) || vary[1] < 40) {
-                        printf("Coloring pixel (a == b): %f,%f\n", vary[0], vary[1]);
-                    }
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -162,9 +159,6 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     colorPixel(ren, unif, tex, vary, color);
-                    if ((vary[0] > 350 && vary[1] > 355.0) || vary[1] < 40) {
-                        printf("Coloring pixel b == c: %f,%f\n", vary[0], vary[1]);
-                    }
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -179,9 +173,6 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     colorPixel(ren, unif, tex, vary, color);
-                    if ((vary[0] > 350 && vary[1] > 355.0) || vary[1] < 40) {
-                        printf("Coloring pixel b < c left: %f,%f\n", vary[0], vary[1]);
-                    }
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -193,9 +184,6 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                     getVary(a, b, c, (double)k, (double)l, ren, vary);
                     //Set pixel colors to the texture sample and some amount of rgb
                     colorPixel(ren, unif, tex, vary, color);
-                    if ((vary[0] > 350 && vary[1] > 355.0) || vary[1] < 40) {
-                        printf("Coloring pixel b < c right: %f,%f\n", vary[0], vary[1]);
-                    }
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -213,9 +201,6 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     colorPixel(ren, unif, tex, vary, color);
-                    if ((vary[0] > 350 && vary[1] > 355.0) || vary[1] < 40) {
-                        printf("Coloring pixel a == c: %f,%f\n", vary[0], vary[1]);
-                    }
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -230,9 +215,6 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     colorPixel(ren, unif, tex, vary, color);
-                    if ((vary[0] > 350 && vary[1] > 355.0) || vary[1] < 40) {
-                        printf("Coloring pixel b > c left: %f,%f\n", vary[0], vary[1]);
-                    }
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }
@@ -245,9 +227,6 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     colorPixel(ren, unif, tex, vary, color);
-                    if ((vary[0] > 350 && vary[1] > 355.0) || vary[1] < 40) {
-                        printf("Coloring pixel b > c right: %f,%f\n", vary[0], vary[1]);
-                    }
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
                 }
             }

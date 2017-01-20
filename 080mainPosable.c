@@ -62,7 +62,7 @@ void draw(meshMesh *mesh, renRenderer *ren, texTexture *tex[]) {
     pixClearRGB(0.0, 0.0, 0.0);
     //Initialize mesh
     // meshInitialize(mesh, 4, 6, 7);
-    meshInitializeEllipse(mesh, 0.0, 0.0, 200.0, 100.0, 400);
+    meshInitializeEllipse(mesh, 0.0, 0.0, 200.0, 100.0, 30);
     //meshInitializeRectangle(mesh, -100.0, 100.0, -100.0, 100.0);
     // //Initialize vertices
     // double a[7] = {10.0, 25.0, 0.0, 0.0, 0.0, 1.0, 1.0};

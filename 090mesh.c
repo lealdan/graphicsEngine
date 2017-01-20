@@ -115,10 +115,10 @@ void meshRender(meshMesh *mesh, renRenderer *ren, double unif[],
 //
 // 		//Render triangles from vary[]
 // 		for (int i = 0; i < mesh->triNum; i++) {
-// 			int *triangle_i = &mesh->tri[i * 3];
-// 			double *a = &vary[triangle_i[0] * ren->varyDim];
-// 			double *b = &vary[triangle_i[1] * ren->varyDim];
-// 			double *c = &vary[triangle_i[2] * ren->varyDim];
+// 			int *triangle_i = meshGetTrianglePointer(mesh, i);
+// 			double *a = &vary[triangle_i[0] * mesh->attrDim];
+// 			double *b = &vary[triangle_i[1] * mesh->attrDim];
+// 			double *c = &vary[triangle_i[2] * mesh->attrDim];
 //
 // 			//Render the transformed attributes
 // 			triRender(ren, unif, tex, a, b, c);

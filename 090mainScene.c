@@ -1,5 +1,5 @@
 /*
-* 080mainScene.c
+* 090mainScene.c
 * Danny Leal 01/09/2017
 */
 
@@ -20,7 +20,6 @@ interpolated attribute vector. */
 void colorPixel(renRenderer *ren, double unif[], texTexture *tex[],
         double vary[], double rgb[]) {
     int varyIndexX = 0, varyIndexY = 1, varyIndexS = 2, varyIndexT = 3;
-    int varyIndexR = 4, varyIndexG = 5, varyIndexB = 6;
     int unifIndexR = 0, unifIndexG = 1, unifIndexB = 2;
     int texIndexR = 0, texIndexG = 1, texIndexB = 2;
 
@@ -34,19 +33,23 @@ void colorPixel(renRenderer *ren, double unif[], texTexture *tex[],
 void transformVertex(renRenderer *ren, double unif[], double attr[],
         double vary[]) {
     int renUNIFISOMETRY = 6;
+    int renPLACEHOLDER = 2;
 
-    //Set the third item in the attribute vector to one to create a 3D vector
-    //The stored value will be remembered to replace the '1' added for 3d multiplication
-    double stored = attr[2];
-    attr[2] = 1;
+    //Set the third item in the attribute vector to '1' to create a 3D vector
+    //The stored value will be remembered to replace the '1' added for 3d multiplication afterwards
+    double stored = attr[renPLACEHOLDER];
+    attr[renPLACEHOLDER] = 1.0;
 
     //Multiply the vector by the translation-rotation matrix stored in the uniforms
     mat331Multiply((double(*)[3])(&unif[renUNIFISOMETRY]), attr, vary);
 
     //Remove the 1 from the final vector
-    vary[2] = stored;
-    //Set the texture coordinates for vary to be the same as attr.
-    vary[3] = attr[3];
+    attr[renPLACEHOLDER] = stored;
+
+    //Set the remaining attributes for vary to be the same as attr.
+    for (int i = 2; i < ren->varyDim; i++) {
+        vary[i] = attr[i];
+    }
 }
 
 /* If unifParent is NULL, then sets the uniform matrix to the
@@ -65,7 +68,6 @@ void updateUniform(renRenderer *ren, double unif[], double unifParent[]) {
         nine numbers. We use '(double(*)[3])' to cast it to a 3x3 matrix. */
         mat33Isometry(unif[renUNIFTHETA], unif[renUNIFTRANSX],
             unif[renUNIFTRANSY], (double(*)[3])(&unif[renUNIFISOMETRY]));
-        mat33Print((double(*)[3])(&unif[renUNIFISOMETRY]));
     }
     else {
         double m[3][3];
@@ -83,48 +85,49 @@ void updateUniform(renRenderer *ren, double unif[], double unifParent[]) {
 //Global variables intended as flags for callbacks to alter
 int textureFilter = 1;
 
-//Global pointers to textures, meshes, and scenes
+//Global pointers to textures, meshes, and nodes
 texTexture initTexture;
 texTexture *tex[1];
+
 renRenderer initRen;
 renRenderer *ren;
+
 meshMesh initMesh;
 meshMesh *mesh;
-sceneNode initScene;
+meshMesh initMesh2;
+meshMesh *mesh2;
+meshMesh initMesh3;
+meshMesh *mesh3;
+meshMesh initMesh4;
+meshMesh *mesh4;
+
+sceneNode initNode;
 sceneNode *node;
+sceneNode initNode2;
+sceneNode *node2;
+sceneNode initNode3;
+sceneNode *node3;
+sceneNode initNode4;
+sceneNode *node4;
 
-
+//Set unif arrays for each node so that it is easy to translate them
+//with respect to their parent
 double unif[15] = {1.0, 1.0, 1.0, 256.0, 256.0, 0.0, 0.0, 0.0, 0.0,
                                                      0.0, 0.0, 0.0,
                                                      0.0, 0.0, 0.0};
+double unif2[15] = {1.0, 1.0, 1.0, 100.0, -100.0, 0.0, 0.0, 0.0, 0.0,
+                                                     0.0, 0.0, 0.0,
+                                                     0.0, 0.0, 0.0};
+double unif3[15] = {1.0, 1.0, 1.0, -100.0, -100.0, 0.0, 0.0, 0.0, 0.0,
+                                                     0.0, 0.0, 0.0,
+                                                     0.0, 0.0, 0.0};
+double unif4[15] = {1.0, 1.0, 1.0, 50.0, -50.0, 0.0, 0.0, 0.0, 0.0,
+                                                     0.0, 0.0, 0.0,
+                                                     0.0, 0.0, 0.0};
 
-/* Draws a texture to the screen */
-void draw(meshMesh *mesh, renRenderer *ren, texTexture *tex[]) {
+/* Draws a scene to the screen */
+void draw() {
     pixClearRGB(0.0, 0.0, 0.0);
-
-    //Initialize textures
-    texInitializeFile(tex[0], "winter.jpg");
-    //Set filtering and wrapping techniques
-    texSetFiltering(tex[0], textureFilter);
-    texSetTopBottom(tex[0], 2);
-    texSetLeftRight(tex[0], 2);
-
-    //Initialize renderer
-    ren->unifDim = 15;
-    ren->texNum = 1;
-    ren->attrDim = 4;
-    ren->varyDim = 4;
-    ren->colorPixel = colorPixel;
-    ren->transformVertex = transformVertex;
-    ren->updateUniform = updateUniform;
-
-    //Initialize mesh
-    meshInitializeEllipse(mesh, 0.0, 0.0, 200.0, 100.0, 400);
-
-    //Initialize scene
-    sceneInitialize(node, ren, unif, tex, mesh, NULL, NULL);
-
-    //Draw the scene to the screen
     sceneRender(node, ren, NULL);
 }
 
@@ -135,12 +138,12 @@ void handleKeyDown(int key, int shiftIsDown, int controlIsDown,
 		if (textureFilter) {
 			textureFilter = 0;
 			texSetFiltering(tex[0], textureFilter);
-			sceneRender(node, ren, NULL);
+			draw();
 		}
 		else {
 			textureFilter = 1;
 			texSetFiltering(tex[0], textureFilter);
-			sceneRender(node, ren, NULL);
+			draw();
 		}
 	}
 }
@@ -150,8 +153,13 @@ the time for the current frame and the time for the previous frame. Both times
 are measured in seconds since some distant past time. */
 void handleTimeStep(double oldTime, double newTime) {
     pixClearRGB(0.0, 0.0, 0.0);
-    unif[5] += (M_PI / 1000.0);
-    sceneRender(node, ren, NULL);
+    //Update the uniform to create an animation
+    unif[5] += (M_PI / 600.0);
+    //Re-initialize the top node in the tree to contain the new unif
+    sceneInitialize(node, ren, unif, tex, mesh, node2, NULL);
+
+    draw();
+
 	if (floor(newTime) - floor(oldTime) >= 1.0)
 		printf("handleTimeStep: %f frames/sec\n", 1.0 / (newTime - oldTime));
 
@@ -159,22 +167,58 @@ void handleTimeStep(double oldTime, double newTime) {
 
 int main(void) {
     //Initialize a draw window
-    if (pixInitialize(512, 512, "Transformations") != 0)
+    if (pixInitialize(512, 512, "Scenes!") != 0)
 		return 1;
 	else {
-        //Render a triangle containing a specified texture
-        //Initialize mesh, renderer, and textures
-        node = &initScene;
+        //Initialize nodes, mesh, renderer, and textures
+        node = &initNode;
+        node2 = &initNode2;
+        node3 = &initNode3;
+        node4 = &initNode4;
+
         mesh = &initMesh;
+        mesh2 = &initMesh2;
+        mesh3 = &initMesh3;
+        mesh4 = &initMesh4;
+
         ren = &initRen;
+
 		tex[0] = &initTexture;
 
+        //Initialize textures
+        texInitializeFile(tex[0], "winter.jpg");
+        //Set filtering and wrapping techniques
+        texSetFiltering(tex[0], textureFilter);
+        texSetTopBottom(tex[0], 2);
+        texSetLeftRight(tex[0], 2);
+
+        //Initialize renderer
+        ren->unifDim = 15;
+        ren->texNum = 1;
+        ren->attrDim = 4;
+        ren->varyDim = 4;
+        ren->colorPixel = colorPixel;
+        ren->transformVertex = transformVertex;
+        ren->updateUniform = updateUniform;
+
+        //Initialize meshes
+        meshInitializeEllipse(mesh, 0.0, 0.0, 200.0, 100.0, 40);
+        meshInitializeEllipse(mesh2, 0.0, 0.0, 100.0, 50.0, 40);
+        meshInitializeRectangle(mesh3, -100.0, 100.0, -100.0, 100.0);
+        meshInitializeEllipse(mesh4, 0.0, 0.0, 100.0, 50, 40);
+
+        //Initialize nodes
+        sceneInitialize(node, ren, unif, tex, mesh, node2, NULL);
+        sceneInitialize(node2, ren, unif2, tex, mesh2, node4, node3);
+        sceneInitialize(node3, ren, unif3, tex, mesh3, NULL, NULL);
+        sceneInitialize(node4, ren, unif4, tex, mesh4, NULL, NULL);
+
         //Set callback handlers
-		pixSetKeyDownHandler(handleKeyDown);
+        pixSetKeyDownHandler(handleKeyDown);
         pixSetTimeStepHandler(handleTimeStep);
 
-        //Draw the textures to the screen
-        draw(mesh, ren, tex);
+        //Draw scene to the screen
+        draw();
 
 		/* Run the event loop. The callbacks that were registered above are
 		invoked as needed. At the end, the resources supporting the window are
@@ -182,7 +226,7 @@ int main(void) {
 		pixRun();
 		texDestroy(tex[0]);
         meshDestroy(mesh);
-        sceneDestroy(node);
+        sceneDestroyRecursively(node);
 		return 0;
 	}
 }
