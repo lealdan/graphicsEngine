@@ -68,9 +68,9 @@ void rearrangeVertices(double a[], double b[], double c[], renRenderer *ren) {
 
 /*
 * Calculates the values of vary (previously chi) based on the provided vectors, and a location
-* within the triangle on the screen.
+* within the triangle on the screen. Returns the determinant.
 */
-void getVary(double a[], double b[], double c[], double x0, double x1, renRenderer *ren, double vary[]) {
+double getVary(double a[], double b[], double c[], double x0, double x1, renRenderer *ren, double vary[]) {
 
     //Set up vectors and matrices for determining values of vary (chi)
     double v_vary[ren->varyDim];
@@ -115,6 +115,7 @@ void getVary(double a[], double b[], double c[], double x0, double x1, renRender
     //Set coordinates of varyAttr, since varyAttr[0] and varyAttr[1] contain weird calculations from a, b, and c
     vary[0] = x0;
     vary[1] = x1;
+    return determinant;
 }
 
 /*
@@ -130,6 +131,7 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
     //Set up the final rgb color array for lighting pixels on the screen and
     //the vary array
     double color[3];
+    double determinant;
     double vary[renVARYDIMBOUND];
 
     //Rasterize the triangle
@@ -141,7 +143,10 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                 double yUpper = getYOfLine(i, a, slopeOf(a, c));
                 for (int j = (int)ceil(yLower); j <= (int)floor(yUpper); j++) {
                     //Determine values of vary (chi/interpolation)
-                    getVary(a, b, c, (double)i, (double)j, ren, vary);
+                    determinant = getVary(a, b, c, (double)i, (double)j, ren, vary);
+                    if (determinant <= 0.0) {
+                        return;
+                    }
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     ren->colorPixel(ren, unif, tex, vary, color);
@@ -155,7 +160,10 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                 double yUpper = getYOfLine(i, a, slopeOf(a, c));
                 for (int j = (int)ceil(yLower); j <= (int)floor(yUpper); j++) {
                     //Determine values of vary (chi/interpolation)
-                    getVary(a, b, c, (double)i, (double)j, ren, vary);
+                    determinant = getVary(a, b, c, (double)i, (double)j, ren, vary);
+                    if (determinant <= 0.0) {
+                        return;
+                    }
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     ren->colorPixel(ren, unif, tex, vary, color);
@@ -169,7 +177,10 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                 double yUpper = getYOfLine(i, a, slopeOf(a, c));
                 for (int j = (int)ceil(yLower); j <= (int)floor(yUpper); j++) {
                     //Determine values of vary (chi/interpolation)
-                    getVary(a, b, c, (double)i, (double)j, ren, vary);
+                    determinant = getVary(a, b, c, (double)i, (double)j, ren, vary);
+                    if (determinant <= 0.0) {
+                        return;
+                    }
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     ren->colorPixel(ren, unif, tex, vary, color);
@@ -181,7 +192,11 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                 double yUpper = getYOfLine(k, a, slopeOf(a, c));
                 for (int l = (int)ceil(yLower); l <= (int)floor(yUpper); l++) {
                     //Determine values of vary (chi/interpolation)
-                    getVary(a, b, c, (double)k, (double)l, ren, vary);
+                    determinant = getVary(a, b, c, (double)k, (double)l, ren, vary);
+                    if (determinant <= 0.0) {
+                        return;
+                    }
+
                     //Set pixel colors to the texture sample and some amount of rgb
                     ren->colorPixel(ren, unif, tex, vary, color);
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);
@@ -197,7 +212,10 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                 double yUpper = getYOfLine(k, c, slopeOf(c, b));
                 for (int l = (int)ceil(yLower); l <= (int)floor(yUpper); l++) {
                     //Determine values of vary (chi/interpolation)
-                    getVary(a, b, c, (double)k, (double)l, ren, vary);
+                    determinant = getVary(a, b, c, (double)k, (double)l, ren, vary);
+                    if (determinant <= 0.0) {
+                        return;
+                    }
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     ren->colorPixel(ren, unif, tex, vary, color);
@@ -211,7 +229,10 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                 double yUpper = getYOfLine(i, a, slopeOf(a, c));
                 for (int j = (int)ceil(yLower); j <= (int)floor(yUpper); j++) {
                     //Determine values of vary (chi/interpolation)
-                    getVary(a, b, c, (double)i, (double)j, ren, vary);
+                    determinant = getVary(a, b, c, (double)i, (double)j, ren, vary);
+                    if (determinant <= 0.0) {
+                        return;
+                    }
 
                     //Set pixel colors to the texture sample and some amount of rgb
                     ren->colorPixel(ren, unif, tex, vary, color);
@@ -223,8 +244,11 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                 double yUpper = getYOfLine(k, c, slopeOf(c, b));
                 for (int l = (int)ceil(yLower); l <= (int)floor(yUpper); l++) {
                     //Determine values of vary (chi/interpolation)
-                    getVary(a, b, c, (double)k, (double)l, ren, vary);
-
+                    determinant = getVary(a, b, c, (double)k, (double)l, ren, vary);
+                    if (determinant <= 0.0) {
+                        return;
+                    }
+                    
                     //Set pixel colors to the texture sample and some amount of rgb
                     ren->colorPixel(ren, unif, tex, vary, color);
                     pixSetRGB(vary[0], vary[1], color[0], color[1], color[2]);

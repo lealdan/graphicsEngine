@@ -154,10 +154,7 @@ are measured in seconds since some distant past time. */
 void handleTimeStep(double oldTime, double newTime) {
     pixClearRGB(0.0, 0.0, 0.0);
     //Update the uniform to create an animation
-    unif[5] += (M_PI / 600.0);
-    //Re-initialize the top node in the tree to contain the new unif
-    sceneInitialize(node, ren, unif, tex, mesh, node2, NULL);
-
+    sceneSetOneUniform(node, 5, node->unif[5] + (M_PI / 600.0));
     draw();
 
 	if (floor(newTime) - floor(oldTime) >= 1.0)

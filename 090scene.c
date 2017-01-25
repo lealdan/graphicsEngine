@@ -59,6 +59,11 @@ void sceneSetUniform(sceneNode *node, renRenderer *ren, double unif[]) {
 		node->unif[i] = unif[i];
 }
 
+/* Sets one uniform of a unif[] of a node */
+void sceneSetOneUniform(sceneNode *node, int i, double unif) {
+	node->unif[i] = unif;
+}
+
 /* Sets the node's ith texture to the given one. */
 void sceneSetTexture(sceneNode *node, renRenderer *ren, int i, texTexture *tex)
 {
