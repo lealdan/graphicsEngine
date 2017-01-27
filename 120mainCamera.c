@@ -1,6 +1,6 @@
 /*
-* 100main3D.c
-* Danny Leal 01/22/2017
+* 120mainCamera.c
+* Danny Leal 01/26/2017
 */
 
 #include <stdio.h>
@@ -55,7 +55,7 @@
 #define renPLACEHOLDER 3
 
 #define renATTRDIM (3 + 2 + 3)
-#define renVARYDIM 5
+#define renVARYDIM (3 + 2)
 #define renTEXNUM 1
 #define renUNIFDIM (3 + 3 + 3 + 1 + 16 + 16)
 
@@ -67,6 +67,8 @@ texTexture initTextureA;
 texTexture *texA[1];
 texTexture initTextureB;
 texTexture *texB[1];
+texTexture initTextureC;
+texTexture *texC[1];
 
 renRenderer initRen;
 renRenderer *ren;
@@ -77,6 +79,10 @@ meshMesh initMeshB;
 meshMesh *meshB;
 meshMesh initMeshC;
 meshMesh *meshC;
+meshMesh initMeshD;
+meshMesh *meshD;
+meshMesh initMeshE;
+meshMesh *meshE;
 
 sceneNode initNodeA;
 sceneNode *nodeA;
@@ -84,16 +90,20 @@ sceneNode initNodeB;
 sceneNode *nodeB;
 sceneNode initNodeC;
 sceneNode *nodeC;
+sceneNode initNodeD;
+sceneNode *nodeD;
+sceneNode initNodeE;
+sceneNode *nodeE;
 
 depthBuffer initDepthBuffer;
 depthBuffer *depth;
 
 //Set unif arrays for each node so that it is easy to translate them
 //with respect to their parent
-double unifA[renUNIFDIM] = {0.8, 0.8, 0.8,
+double unifA[renUNIFDIM] = {2.5, 2.5, 2.5,
                             0.0, 0.0, 0.0,
                             0.0, 0.0, M_PI / 2.0,
-                            100.0,
+                            60.0,
                             1.0, 0.0, 0.0, 0.0,
                             0.0, 1.0, 0.0, 0.0,
                             0.0, 0.0, 1.0, 0.0,
@@ -103,10 +113,10 @@ double unifA[renUNIFDIM] = {0.8, 0.8, 0.8,
                                 0.0, 0.0, 1.0, 0.0,
                                 0.0, 0.0, 0.0, 1.0};
 
-double unifB[renUNIFDIM] = {1.0, 1.0, 1.0,
-                            200.0, 350.0, 100.0,
+double unifB[renUNIFDIM] = {1.5, 1.5, 1.5,
+                            200.0, 150.0, 5.0,
                             0.0, 0.0, M_PI,
-                            40.0,
+                            15.0,
                             1.0, 0.0, 0.0, 0.0,
                             0.0, 1.0, 0.0, 0.0,
                             0.0, 0.0, 1.0, 0.0,
@@ -117,9 +127,35 @@ double unifB[renUNIFDIM] = {1.0, 1.0, 1.0,
                                 0.0, 0.0, 0.0, 1.0};
 
 double unifC[renUNIFDIM] = {1.0, 1.0, 1.0,
-                            -200.0, -125.0, -150.0,
+                            -50.0, -70.0, -5.0,
                             0.0, M_PI / 2.0, M_PI / 3.0,
-                            30.0,
+                            7.5,
+                            1.0, 0.0, 0.0, 0.0,
+                            0.0, 1.0, 0.0, 0.0,
+                            0.0, 0.0, 1.0, 0.0,
+                            0.0, 0.0, 0.0, 1.0,
+                                1.0, 0.0, 0.0, 0.0,
+                                0.0, 1.0, 0.0, 0.0,
+                                0.0, 0.0, 1.0, 0.0,
+                                0.0, 0.0, 0.0, 1.0};
+
+double unifD[renUNIFDIM] = {0.9, 0.9, 0.9,
+                            70.0, 95.0, -1.0,
+                            0.0, M_PI / 2.0, M_PI / 3.0,
+                            12.0,
+                            1.0, 0.0, 0.0, 0.0,
+                            0.0, 1.0, 0.0, 0.0,
+                            0.0, 0.0, 1.0, 0.0,
+                            0.0, 0.0, 0.0, 1.0,
+                                1.0, 0.0, 0.0, 0.0,
+                                0.0, 1.0, 0.0, 0.0,
+                                0.0, 0.0, 1.0, 0.0,
+                                0.0, 0.0, 0.0, 1.0};
+
+double unifE[renUNIFDIM] = {1.0, 1.0, 1.0,
+                            -5.0, -30.0, 0.0,
+                            0.0, M_PI / 2.0, M_PI / 3.0,
+                            2.5,
                             1.0, 0.0, 0.0, 0.0,
                             0.0, 1.0, 0.0, 0.0,
                             0.0, 0.0, 1.0, 0.0,
@@ -130,7 +166,9 @@ double unifC[renUNIFDIM] = {1.0, 1.0, 1.0,
                                 0.0, 0.0, 0.0, 1.0};
 
 double target[3] = {0.0, 0.0, 0.0};
-double camAngle = M_PI / 2.0;
+double camAngleY = 0.0;
+double camAngleX = 0.0;
+double camDistance = 600.0;
 
 
 /* Sets rgb, based on the other parameters, which are unaltered. vary is an
@@ -141,6 +179,7 @@ void colorPixel(renRenderer *ren, double unif[], texTexture *tex[],
     rgbz[0] = tex[0]->sample[texIndexR] * unif[renUNIFR];
     rgbz[1] = tex[0]->sample[texIndexG] * unif[renUNIFG];
     rgbz[2] = tex[0]->sample[texIndexB] * unif[renUNIFB];
+    //Set the depth buffer (texture z-value)
     rgbz[3] = vary[2];
 }
 
@@ -152,14 +191,15 @@ void transformVertex(renRenderer *ren, double unif[], double attr[],
     double stored = attr[renPLACEHOLDER];
     attr[renPLACEHOLDER] = 1.0;
 
-    //Multiply the vector by the translation-rotation matrix stored in the uniforms
+    //Multiply the vector by the translation-rotation matrix stored in the uniforms to
+    //achieve the model transformations
     mat441Multiply((double(*)[4])(&unif[renUNIFISOMETRY]), attr, vary);
 
-    //Multiply the vector by the inverse of the camera matrix
+    //Multiply the vector by the inverse of the camera matrix to position the camera
     double tmp[4];
     mat441Multiply((double(*)[4])(&unif[renCAMERA]), vary, tmp);
 
-    //Remove the 1 from the final vector
+    //Remove the placeHolder '1' from the final vector
     attr[renPLACEHOLDER] = stored;
 
     //Set the remaining attributes for vary to be the same as attr.
@@ -230,61 +270,75 @@ void handleKeyDown(int key, int shiftIsDown, int controlIsDown,
 			textureFilter = 0;
 			texSetFiltering(texA[0], textureFilter);
             texSetFiltering(texB[0], textureFilter);
+            texSetFiltering(texC[0], textureFilter);
 			draw();
 		}
 		else {
 			textureFilter = 1;
 			texSetFiltering(texA[0], textureFilter);
             texSetFiltering(texB[0], textureFilter);
+            texSetFiltering(texC[0], textureFilter);
 			draw();
 		}
 	}
     if (key == GLFW_KEY_A) {
         //Alter the texture filtering of the image.
         target[1] += 10;
-        renLookAt(ren, target, 512.0, camAngle, 0.0);
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
         draw();
     }
     if (key == GLFW_KEY_S) {
         //Alter the texture filtering of the image.
         target[2] += 10;
-        renLookAt(ren, target, 512.0, camAngle, 0.0);
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
         draw();
     }
     if (key == GLFW_KEY_D) {
         //Alter the texture filtering of the image.
         target[1] -= 10;
-        renLookAt(ren, target, 512.0, camAngle, 0.0);
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
         draw();
     }
     if (key == GLFW_KEY_W) {
         //Alter the texture filtering of the image.
         target[2] -= 10;
-        renLookAt(ren, target, 512.0, camAngle, 0.0);
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
+        draw();
+    }
+    if (key == GLFW_KEY_Z) {
+        //Alter the texture filtering of the image.
+        target[0] += 10;
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
+        draw();
+    }
+    if (key == GLFW_KEY_X) {
+        //Alter the texture filtering of the image.
+        target[0] -= 10;
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
         draw();
     }
     if (key == GLFW_KEY_I) {
-        camAngle += 0.1;
+        camAngleY += 0.1;
         //Alter the texture filtering of the image.
-        renLookAt(ren, target, 512.0, camAngle, 0.0);
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
         draw();
     }
     if (key == GLFW_KEY_K) {
         //Alter the texture filtering of the image.
-        camAngle -= 0.1;
-        renLookAt(ren, target, 512.0, camAngle, 0.0);
+        camAngleY -= 0.1;
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
         draw();
     }
     if (key == GLFW_KEY_J) {
         //Alter the texture filtering of the image.
-        target[0] += 10.0;
-        renLookAt(ren, target, 512.0, camAngle, 0.0);
+        camAngleX += 0.1;
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
         draw();
     }
     if (key == GLFW_KEY_L) {
         //Alter the texture filtering of the image.
-        target[0] -= 10.0;
-        renLookAt(ren, target, 512.0, camAngle, 0.0);
+        camAngleX -= 0.1;
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
         draw();
     }
 }
@@ -297,8 +351,10 @@ void handleTimeStep(double oldTime, double newTime) {
     depthClearZs(depth, -99999.0);
     //Update the uniform to create an animation
     sceneSetOneUniform(nodeA, renUNIFALPHA, nodeA->unif[renUNIFALPHA] + (M_PI / 300.0));
-    sceneSetOneUniform(nodeB, renUNIFALPHA, nodeB->unif[renUNIFALPHA] - (M_PI / 300.0));
-    sceneSetOneUniform(nodeC, renUNIFALPHA, nodeC->unif[renUNIFALPHA] + (M_PI / 100.0));
+    sceneSetOneUniform(nodeB, renUNIFALPHA, nodeB->unif[renUNIFALPHA] + (M_PI / 100.0));
+    sceneSetOneUniform(nodeC, renUNIFALPHA, nodeC->unif[renUNIFALPHA] - (M_PI / 100.0));
+    sceneSetOneUniform(nodeD, renUNIFALPHA, nodeD->unif[renUNIFALPHA] - (M_PI / 300.0));
+    sceneSetOneUniform(nodeE, renUNIFALPHA, nodeE->unif[renUNIFALPHA] - (M_PI / 100.0));
     draw();
 
 	if (floor(newTime) - floor(oldTime) >= 1.0)
@@ -311,38 +367,12 @@ int main(void) {
     if (pixInitialize(winDIM, winDIM, "3D!") != 0)
 		return 1;
 	else {
-        //Initialize nodes, mesh, renderer, and textures
-        nodeA = &initNodeA;
-        nodeB = &initNodeB;
-        nodeC = &initNodeC;
-
-        meshA = &initMeshA;
-        meshB = &initMeshB;
-        meshC = &initMeshC;
-
-        ren = &initRen;
-
-		texA[0] = &initTextureA;
-        texB[0] = &initTextureB;
-
+        //Initialize depth buffer
         depth = &initDepthBuffer;
-
         depthInitialize(depth, winDIM, winDIM);
 
-        //Initialize textures
-        texInitializeFile(texA[0], "world.jpg");
-        //Set filtering and wrapping techniques
-        texSetFiltering(texA[0], textureFilter);
-        texSetTopBottom(texA[0], 2);
-        texSetLeftRight(texA[0], 2);
-
-        texInitializeFile(texB[0], "moon.jpg");
-        //Set filtering and wrapping techniques
-        texSetFiltering(texB[0], textureFilter);
-        texSetTopBottom(texB[0], 2);
-        texSetLeftRight(texB[0], 2);
-
         //Initialize renderer
+        ren = &initRen;
         ren->unifDim = renUNIFDIM;
         ren->texNum = renTEXNUM;
         ren->attrDim = renATTRDIM;
@@ -351,18 +381,58 @@ int main(void) {
         ren->transformVertex = transformVertex;
         ren->updateUniform = updateUniform;
         ren->depth = depth;
-        renLookAt(ren, target, 512.0, camAngle, 0.0);
+        renLookAt(ren, target, camDistance, camAngleY, camAngleX);
+
+        //Initialize textures
+		texA[0] = &initTextureA;
+        texB[0] = &initTextureB;
+        texC[0] = &initTextureC;
+        texInitializeFile(texA[0], "venus.jpg");
+        //Set filtering and wrapping techniques
+        texSetFiltering(texA[0], textureFilter);
+        texSetTopBottom(texA[0], 2);
+        texSetLeftRight(texA[0], 2);
+        texInitializeFile(texB[0], "world.jpg");
+        //Set filtering and wrapping techniques
+        texSetFiltering(texB[0], textureFilter);
+        texSetTopBottom(texB[0], 2);
+        texSetLeftRight(texB[0], 2);
+        texInitializeFile(texC[0], "moon.jpg");
+        //Set filtering and wrapping techniques
+        texSetFiltering(texC[0], textureFilter);
+        texSetTopBottom(texC[0], 2);
+        texSetLeftRight(texC[0], 2);
 
         //Initialize meshes
+        meshA = &initMeshA;
+        meshB = &initMeshB;
+        meshC = &initMeshC;
+        meshD = &initMeshD;
+        meshE = &initMeshE;
         //meshInitializeBox(meshA, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
+        // double zs[3][4] = {
+        // 	{100.0, 90.0, 70.0, 60.0},
+        // 	{60.0, 50.0, 30.0, 10.0},
+        // 	{40.0, 30.0, -10.0, -20.0}};
+        // int error = meshInitializeLandscape(meshA, 3, 4, 100.0, (double *)zs);
         meshInitializeSphere(meshA, unifA[renUNIFRADIUS], 80, 40);
         meshInitializeSphere(meshB, unifB[renUNIFRADIUS], 20, 40);
         meshInitializeSphere(meshC, unifC[renUNIFRADIUS], 20, 40);
+        meshInitializeSphere(meshD, unifD[renUNIFRADIUS], 20, 40);
+        meshInitializeSphere(meshE, unifE[renUNIFRADIUS], 20, 40);
 
         //Initialize nodes
+        nodeA = &initNodeA;
+        nodeB = &initNodeB;
+        nodeC = &initNodeC;
+        nodeD = &initNodeD;
+        nodeE = &initNodeE;
         sceneInitialize(nodeA, ren, unifA, texA, meshA, nodeB, NULL);
-        sceneInitialize(nodeB, ren, unifB, texB, meshB, NULL, nodeC);
-        sceneInitialize(nodeC, ren, unifC, texB, meshC, NULL, NULL);
+        sceneInitialize(nodeB, ren, unifB, texB, meshB, nodeE, nodeC);
+        sceneInitialize(nodeC, ren, unifC, texC, meshC, NULL, NULL);
+        sceneInitialize(nodeD, ren, unifD, texA, meshD, NULL, NULL);
+        sceneInitialize(nodeE, ren, unifE, texC, meshE, NULL, NULL);
+        sceneAddSibling(nodeB, nodeD);
 
         //Set callback handlers
         pixSetKeyDownHandler(handleKeyDown);
@@ -377,8 +447,12 @@ int main(void) {
 		pixRun();
 		texDestroy(texA[0]);
         texDestroy(texB[0]);
+        texDestroy(texC[0]);
         meshDestroy(meshA);
         meshDestroy(meshB);
+        meshDestroy(meshC);
+        meshDestroy(meshD);
+        meshDestroy(meshE);
         sceneDestroyRecursively(nodeA);
 		return 0;
 	}

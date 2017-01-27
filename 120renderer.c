@@ -11,13 +11,13 @@ struct renRenderer {
     int texNum;
     int attrDim;
     int varyDim;
-    double cameraRotation[3][3];
-    double cameraTranslation[3];
-    double viewing[4][4];
-    depthBuffer *depth;
     void (*colorPixel)(renRenderer*, double[], texTexture**, double[], double[]);
     void (*transformVertex)(renRenderer*, double[], double[], double[]);
     void (*updateUniform)(renRenderer*, double[], double[]);
+    depthBuffer *depth;
+    double cameraRotation[3][3];
+    double cameraTranslation[3];
+    double viewing[4][4];
 };
 
 

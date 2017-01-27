@@ -462,3 +462,48 @@ int meshInitializeLandscape(meshMesh *mesh, int width, int height,
 	}
 	return error;
 }
+
+/* Given a landscape, such as that built by meshInitializeLandscape. Builds a
+new landscape mesh by extracting triangles based on how horizontal they are. If
+noMoreThan is true, then triangles are kept that deviate from horizontal by no more than angle. If noMoreThan is false, then triangles are kept that deviate
+from horizontal by more than angle. Don't forget to call meshDestroy when
+finished. Warning: May contain extraneous vertices not used by any triangle. */
+int meshInitializeDissectedLandscape(meshMesh *mesh, meshMesh *land,
+		double angle, int noMoreThan) {
+	int error, i, j = 0, triNum = 0;
+	int *tri, *newTri;
+	double normal[3];
+	/* Count the triangles that are nearly horizontal. */
+	for (i = 0; i < land->triNum; i += 1) {
+		tri = meshGetTrianglePointer(land, i);
+		meshTrueNormal(meshGetVertexPointer(land, tri[0]),
+			meshGetVertexPointer(land, tri[1]),
+			meshGetVertexPointer(land, tri[2]), normal);
+		if ((noMoreThan && normal[2] >= cos(angle)) ||
+				(!noMoreThan && normal[2] < cos(angle)))
+			triNum += 1;
+	}
+	error = meshInitialize(mesh, triNum, land->vertNum, 3 + 2 + 3);
+	if (error == 0) {
+		/* Copy all of the vertices. */
+		vecCopy(land->vertNum * (3 + 2 + 3), land->vert, mesh->vert);
+		/* Copy just the horizontal triangles. */
+		for (i = 0; i < land->triNum; i += 1) {
+			tri = meshGetTrianglePointer(land, i);
+			meshTrueNormal(meshGetVertexPointer(land, tri[0]),
+				meshGetVertexPointer(land, tri[1]),
+				meshGetVertexPointer(land, tri[2]), normal);
+			if ((noMoreThan && normal[2] >= cos(angle)) ||
+					(!noMoreThan && normal[2] < cos(angle))) {
+				newTri = meshGetTrianglePointer(mesh, j);
+				newTri[0] = tri[0];
+				newTri[1] = tri[1];
+				newTri[2] = tri[2];
+				j += 1;
+			}
+		}
+		/* Reset the normals, to make the cliff edges appear sharper. */
+		meshSmoothNormals(mesh, 5);
+	}
+	return error;
+}
