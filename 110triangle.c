@@ -1,5 +1,5 @@
 /*
-* 090triangle.c
+* 110triangle.c
 * Danny Leal 01/11/2017
 */
 
@@ -139,9 +139,15 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
     if (c[0] >= b[0]) {
         if (a[0] == b[0]) {
             for (int i = (int)ceil(b[0]); i <= (int)floor(c[0]); i++) {
+                if (!(i >= 0 && i <= ren->depth->width)) {
+                    continue;
+                }
                 double yLower = getYOfLine(i, b, slopeOf(b, c));
                 double yUpper = getYOfLine(i, a, slopeOf(a, c));
                 for (int j = (int)ceil(yLower); j <= (int)floor(yUpper); j++) {
+                    if (!(j >= 0 && j <= ren->depth->height)) {
+                        continue;
+                    }
                     //Determine values of vary (chi/interpolation)
                     determinant = getVary(a, b, c, (double)i, (double)j, ren, vary);
                     if (determinant <= 0.0) {
@@ -159,9 +165,15 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
         }
         if (b[0] == c[0]) {
             for (int i = (int)ceil(a[0]); i <= (int)floor(b[0]); i++) {
+                if (!(i >= 0 && i <= ren->depth->width)) {
+                    continue;
+                }
                 double yLower = getYOfLine(i, a, slopeOf(a, b));
                 double yUpper = getYOfLine(i, a, slopeOf(a, c));
                 for (int j = (int)ceil(yLower); j <= (int)floor(yUpper); j++) {
+                    if (!(j >= 0 && j <= ren->depth->height)) {
+                        continue;
+                    }
                     //Determine values of vary (chi/interpolation)
                     determinant = getVary(a, b, c, (double)i, (double)j, ren, vary);
                     if (determinant <= 0.0) {
@@ -179,9 +191,15 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
         }
         else {
             for (int i = (int)ceil(a[0]); i <= (int)floor(b[0]); i++) {
+                if (!(i >= 0 && i <= ren->depth->width)) {
+                    continue;
+                }
                 double yLower = getYOfLine(i, a, slopeOf(a, b));
                 double yUpper = getYOfLine(i, a, slopeOf(a, c));
                 for (int j = (int)ceil(yLower); j <= (int)floor(yUpper); j++) {
+                    if (!(j >= 0 && j <= ren->depth->height)) {
+                        continue;
+                    }
                     //Determine values of vary (chi/interpolation)
                     determinant = getVary(a, b, c, (double)i, (double)j, ren, vary);
                     if (determinant <= 0.0) {
@@ -197,9 +215,15 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                 }
             }
             for (int k = (int)ceil(b[0]); k <= (int)floor(c[0]); k++) {
+                if (!(k >= 0 && k <= ren->depth->width)) {
+                    continue;
+                }
                 double yLower = getYOfLine(k, b, slopeOf(b, c));
                 double yUpper = getYOfLine(k, a, slopeOf(a, c));
                 for (int l = (int)ceil(yLower); l <= (int)floor(yUpper); l++) {
+                    if (!(l >= 0 && l <= ren->depth->height)) {
+                        continue;
+                    }
                     //Determine values of vary (chi/interpolation)
                     determinant = getVary(a, b, c, (double)k, (double)l, ren, vary);
                     if (determinant <= 0.0) {
@@ -220,9 +244,15 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
     else if (b[0] > c[0]) {
         if (a[0] == c[0]) {
             for (int k = (int)ceil(c[0]); k <= (int)floor(b[0]); k++) {
+                if (!(k >= 0 && k <= ren->depth->width)) {
+                    continue;
+                }
                 double yLower = getYOfLine(k, a, slopeOf(a, b));
                 double yUpper = getYOfLine(k, c, slopeOf(c, b));
                 for (int l = (int)ceil(yLower); l <= (int)floor(yUpper); l++) {
+                    if (!(l >= 0 && l <= ren->depth->height)) {
+                        continue;
+                    }
                     //Determine values of vary (chi/interpolation)
                     determinant = getVary(a, b, c, (double)k, (double)l, ren, vary);
                     if (determinant <= 0.0) {
@@ -240,9 +270,15 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
         }
         else {
             for (int i = (int)ceil(a[0]); i <= (int)floor(c[0]); i++) {
+                if (!(i >= 0 && i <= ren->depth->width)) {
+                    continue;
+                }
                 double yLower = getYOfLine(i, a, slopeOf(a, b));
                 double yUpper = getYOfLine(i, a, slopeOf(a, c));
                 for (int j = (int)ceil(yLower); j <= (int)floor(yUpper); j++) {
+                    if (!(j >= 0 && j <= ren->depth->height)) {
+                        continue;
+                    }
                     //Determine values of vary (chi/interpolation)
                     determinant = getVary(a, b, c, (double)i, (double)j, ren, vary);
                     if (determinant <= 0.0) {
@@ -258,9 +294,15 @@ void triRender(renRenderer *ren, double unif[], texTexture *tex[], double a[],
                 }
             }
             for (int k = (int)ceil(c[0]); k <= (int)floor(b[0]); k++) {
+                if (!(k >= 0 && k <= ren->depth->width)) {
+                    continue;
+                }
                 double yLower = getYOfLine(k, a, slopeOf(a, b));
                 double yUpper = getYOfLine(k, c, slopeOf(c, b));
                 for (int l = (int)ceil(yLower); l <= (int)floor(yUpper); l++) {
+                    if (!(l >= 0 && l <= ren->depth->width)) {
+                        continue;
+                    }
                     //Determine values of vary (chi/interpolation)
                     determinant = getVary(a, b, c, (double)k, (double)l, ren, vary);
                     if (determinant <= 0.0) {

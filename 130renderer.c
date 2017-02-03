@@ -65,8 +65,21 @@ void renLookFrom(renRenderer *ren, double position[3], double phi,
 
 /* Updates the renderer's viewing transformation, based on the camera. */
 void renUpdateViewing(renRenderer *ren) {
-    mat44InverseIsometry(ren->cameraRotation, ren->cameraTranslation, ren->viewing);
-    mat
+    double proj[4][4];
+    double tmp[4][4];
+
+    mat44InverseIsometry(ren->cameraRotation, ren->cameraTranslation, tmp);
+    if (ren->projectionType == renORTHOGRAPHIC) {
+        mat44Orthographic(ren->projection[renPROJL], ren->projection[renPROJR], ren->projection[renPROJB],
+            ren->projection[renPROJT], ren->projection[renPROJF], ren->projection[renPROJN], proj);
+        mat444Multiply(proj, tmp, ren->viewing);
+    }
+    else if (ren->projectionType == renPERSPECTIVE) {
+        mat44Perspective(ren->projection, proj);
+        mat444Multiply(proj, tmp, ren->viewing);
+    }
+
+    mat44Viewport(ren->depth->width, ren->depth->height, ren->viewport);
 }
 
 /* Sets the projection type, to either renORTHOGRAPHIC or renPERSPECTIVE. */
