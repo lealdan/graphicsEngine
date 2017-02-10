@@ -507,3 +507,43 @@ int meshInitializeDissectedLandscape(meshMesh *mesh, meshMesh *land,
 	}
 	return error;
 }
+
+/* Builds a mesh for a circular cylinder with spherical caps, centered at the
+origin, of radius r and length l > 2 * r. The sideNum and layerNum parameters
+control the fineness of the mesh. The attributes are XYZ position, ST texture,
+and NOP unit normal vector. The normals are smooth. Don't forget to meshDestroy
+when finished. */
+int meshInitializeCapsule(meshMesh *mesh, double r, double l, int layerNum,
+		int sideNum) {
+	int error, i;
+	double theta;
+	double *ts = (double *)malloc((2 * layerNum + 2) * 3 * sizeof(double));
+	if (ts == NULL)
+		return 1;
+	else {
+		double *zs = &ts[2 * layerNum + 2];
+		double *rs = &ts[4 * layerNum + 4];
+		zs[0] = -l / 2.0;
+		rs[0] = 0.0;
+		ts[0] = 0.0;
+		for (i = 1; i <= layerNum; i += 1) {
+			theta = M_PI / 2.0 * (3 + i / (double)layerNum);
+			zs[i] = -l / 2.0 + r + r * sin(theta);
+			rs[i] = r * cos(theta);
+			ts[i] = (zs[i] + l / 2.0) / l;
+		}
+		for (i = 0; i < layerNum; i += 1) {
+			theta = M_PI / 2.0 * i / (double)layerNum;
+			zs[layerNum + 1 + i] = l / 2.0 - r + r * sin(theta);
+			rs[layerNum + 1 + i] = r * cos(theta);
+			ts[layerNum + 1 + i] = (zs[layerNum + 1 + i] + l / 2.0) / l;
+		}
+		zs[2 * layerNum + 1] = l / 2.0;
+		rs[2 * layerNum + 1] = 0.0;
+		ts[2 * layerNum + 1] = 1.0;
+		error = meshInitializeRevolution(mesh, 2 * layerNum + 2, zs, rs, ts,
+			sideNum);
+		free(ts);
+		return error;
+	}
+}

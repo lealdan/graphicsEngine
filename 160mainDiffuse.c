@@ -219,7 +219,6 @@ void colorPixel(renRenderer *ren, double unif[], texTexture *tex[],
     vecUnit(3, l, lUnit);
     nDotL = vecDot(3, nUnit, lUnit);
     diffInt = fmax(0.0, nDotL);
-    diffInt += 0.1;
 
     rgbz[0] = diffInt * tex[0]->sample[texIndexR] * unif[renUNIFR] * unif[renLIGHTR];
     rgbz[1] = diffInt * tex[0]->sample[texIndexG] * unif[renUNIFG] * unif[renLIGHTG];

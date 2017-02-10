@@ -1,5 +1,5 @@
 /*
-* 170mainSpecular.c
+* 190mainFog.c
 * Danny Leal 01/28/2017
 */
 #define renVERTNUMBOUND 16
@@ -119,7 +119,7 @@ depthBuffer *depth;
 
 //Set unif arrays for each node so that it is easy to translate them
 //with respect to their parent
-double unifA[renUNIFDIM] = {2.5, 2.5, 2.5, //RGB
+double unifA[renUNIFDIM] = {1.5, 1.5, 1.5, //RGB
                             0.0, 0.0, 0.0, //Translation
                             0.0, 0.0, M_PI / 2.0, //Rotation
                             60.0, //Radius
@@ -132,7 +132,7 @@ double unifA[renUNIFDIM] = {2.5, 2.5, 2.5, //RGB
                                 0.0, 0.0, 1.0, 0.0,
                                 0.0, 0.0, 0.0, 1.0, //41
                             0.0, 0.0, 0.0, //Lighting location
-                            0.5, 0.5, 0.5, //Lighting RGB
+                            0.7, 0.7, 0.7, //Lighting RGB
                             0.0, 0.0, 0.0};
 
 double unifB[renUNIFDIM] = {1.5, 1.5, 1.5,
@@ -148,7 +148,7 @@ double unifB[renUNIFDIM] = {1.5, 1.5, 1.5,
                                 0.0, 0.0, 1.0, 0.0,
                                 0.0, 0.0, 0.0, 1.0,
                             0.0, 0.0, 0.0,
-                            0.5, 0.5, 0.5,
+                            0.7, 0.7, 0.7,
                             0.0, 0.0, 0.0};
 
 double unifC[renUNIFDIM] = {1.0, 1.0, 1.0,
@@ -164,7 +164,7 @@ double unifC[renUNIFDIM] = {1.0, 1.0, 1.0,
                                 0.0, 0.0, 1.0, 0.0,
                                 0.0, 0.0, 0.0, 1.0,
                             0.0, 0.0, 0.0,
-                            0.5, 0.5, 0.5,
+                            0.7, 0.7, 0.7,
                             0.0, 0.0, 0.0};
 
 double unifD[renUNIFDIM] = {0.9, 0.9, 0.9,
@@ -180,7 +180,7 @@ double unifD[renUNIFDIM] = {0.9, 0.9, 0.9,
                                 0.0, 0.0, 1.0, 0.0,
                                 0.0, 0.0, 0.0, 1.0,
                             0.0, 0.0, 0.0,
-                            0.5, 0.5, 0.5,
+                            0.7, 0.7, 0.7,
                             0.0, 0.0, 0.0};
 
 double unifE[renUNIFDIM] = {2.0, 2.0, 2.0,
@@ -196,7 +196,7 @@ double unifE[renUNIFDIM] = {2.0, 2.0, 2.0,
                                 0.0, 0.0, 1.0, 0.0,
                                 0.0, 0.0, 0.0, 1.0,
                             0.0, 0.0, 0.0,
-                            0.5, 0.5, 0.5,
+                            0.7, 0.7, 0.7,
                             0.0, 0.0, 0.0};
 
 //Setup camera angles and projection types
@@ -207,7 +207,7 @@ double camDistance = 600.0;
 double fovy = M_PI / 6.0;
 double focal = 1000.0;
 double ratio = 10.0;
-int projectionType = renORTHOGRAPHIC;
+int projectionType = renPERSPECTIVE;
 
 
 /* Sets rgb, based on the other parameters, which are unaltered. vary is an
@@ -227,9 +227,15 @@ void colorPixel(renRenderer *ren, double unif[], texTexture *tex[],
     double diffInt;
     double rDotC;
     double specInt;
+    double finalRGB[3];
+    double scaledFinalRGB[3];
+    double scaledFog[3];
+    double tempFinalFog[3];
 
-    double shininess = 128.0;
-    double coat[3] = {0.8, 0.8, 0.8};
+    double shininess = 30.0;
+    double coat[3] = {0.7, 0.7, 0.7};
+    double ambience = 0.1;
+    double fog[3] = {0.8, 0.8, 0.8};
 
     texSample(tex[0], vary[varyIndexS], vary[varyIndexT]);
 
@@ -238,20 +244,32 @@ void colorPixel(renRenderer *ren, double unif[], texTexture *tex[],
     vecUnit(3, camera, cameraUnit);
     nDotL = vecDot(3, nUnit, lUnit);
     diffInt = fmax(0.0, nDotL);
+    diffInt += ambience;
 
     vecScale(3, nDotL, nUnit, p);
     vecScale(3, 2.0, p, twoTimesP);
     vecSubtract(3, twoTimesP, lUnit, r);
     rDotC = vecDot(3, r, cameraUnit);
     specInt = pow(fmax(0.0, rDotC), shininess);
+
     //Remove back-side specular lighting
     if (diffInt == 0) {
         specInt = 0;
     }
 
-    rgbz[0] = diffInt * tex[0]->sample[texIndexR] * unif[renUNIFR] * unif[renLIGHTR] + (specInt * unif[renLIGHTR] * coat[0]);
-    rgbz[1] = diffInt * tex[0]->sample[texIndexG] * unif[renUNIFG] * unif[renLIGHTG] + (specInt * unif[renLIGHTG] * coat[1]);
-    rgbz[2] = diffInt * tex[0]->sample[texIndexB] * unif[renUNIFB] * unif[renLIGHTB] + (specInt * unif[renLIGHTB] * coat[2]);
+    finalRGB[0] = diffInt * tex[0]->sample[texIndexR] * unif[renUNIFR] * unif[renLIGHTR] + (specInt * unif[renLIGHTR] * coat[0]);
+    finalRGB[1] = diffInt * tex[0]->sample[texIndexG] * unif[renUNIFG] * unif[renLIGHTG] + (specInt * unif[renLIGHTG] * coat[1]);
+    finalRGB[2] = diffInt * tex[0]->sample[texIndexB] * unif[renUNIFB] * unif[renLIGHTB] + (specInt * unif[renLIGHTB] * coat[2]);
+
+    //Implement fog
+    vecScale(3, (vary[varyIndexZ] + 1.0) / 2.0, finalRGB, scaledFinalRGB);
+    vecScale(3, 1.0 - (vary[varyIndexZ] + 1.0) / 2.0, fog, scaledFog);
+    vecAdd(3, scaledFinalRGB, scaledFog, tempFinalFog);
+
+    rgbz[0] = tempFinalFog[0];
+    rgbz[1] = tempFinalFog[1];
+    rgbz[2] = tempFinalFog[2];
+
     //Set the depth buffer (texture z-value)
     rgbz[3] = vary[varyIndexZ];
 }
@@ -328,7 +346,7 @@ void updateUniform(renRenderer *ren, double unif[], double unifParent[]) {
 
 /* Draws a scene to the screen */
 void draw() {
-    pixClearRGB(0.0, 0.0, 0.0);
+    pixClearRGB(0.8, 0.8, 0.8);
     renSetFrustum(ren, projectionType, fovy, focal, ratio);
     renUpdateViewing(ren);
     depthClearZs(depth, -1.0);
@@ -380,13 +398,13 @@ void handleKeyDown(int key, int shiftIsDown, int controlIsDown,
     }
     if (key == GLFW_KEY_K) {
         //Alter the texture filtering of the image.
-        target[0] += 10;
+        target[0] += 60;
         renLookAt(ren, target, camDistance, camAngleY, camAngleX);
         draw();
     }
     if (key == GLFW_KEY_I) {
         //Alter the texture filtering of the image.
-        target[0] -= 10;
+        target[0] -= 60;
         renLookAt(ren, target, camDistance, camAngleY, camAngleX);
         draw();
     }
