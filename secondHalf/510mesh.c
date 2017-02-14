@@ -107,7 +107,6 @@ vector. Similarly, attrLocs is an array of length attrNum, giving the location
 of the ith attribute in the active OpenGL shader program. */
 void meshGLRender(meshGLMesh *meshGL, GLuint attrNum, GLuint attrDims[],
 		GLint attrLocs[]) {
-	/* !! */
 	glEnableVertexAttribArray(attrLocs[0]);
 	glEnableVertexAttribArray(attrLocs[1]);
 	glEnableVertexAttribArray(attrLocs[2]);
