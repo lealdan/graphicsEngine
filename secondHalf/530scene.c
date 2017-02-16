@@ -134,11 +134,6 @@ void sceneRemoveChild(sceneNode *node, sceneNode *child) {
 
 /*** OpenGL ***/
 
-void vecOpenGL(int dim, GLdouble v[], GLfloat openGL[]) {
-	for (int i = 0; i < dim; i += 1)
-		openGL[i] = v[i];
-}
-
 /* Renders the node, its younger siblings, and their descendants. parent is the
 modeling matrix at the parent of the node. If the node has no parent, then this
 matrix is the 4x4 identity matrix. Loads the modeling transformation into
@@ -153,20 +148,32 @@ void sceneRender(sceneNode *node, GLdouble parent[4][4], GLint modelingLoc,
 	else {
 		/* Set the uniform modeling matrix. */
 		GLdouble m[4][4];
-		GLdouble toUniforms[4][4];
+		GLdouble finalTransformation[4][4];
 		GLfloat openGL[4][4];
 		mat44Isometry(node->rotation, node->translation, m);
-		mat444Multiply(parent, m, toUniforms);
-		mat44OpenGL(toUniforms, openGL);
+		mat444Multiply(parent, m, finalTransformation);
+		mat44OpenGL(finalTransformation, openGL);
 		glUniformMatrix4fv(modelingLoc, 1, GL_FALSE, (GLfloat *)openGL);
 
 		/* Set the other uniforms. The casting from double to float is annoying. */
-		glUniform2fv(unifLocs[0], 1, (GLfloat *)node->unif);
-
+		for (int i = 0; i < unifNum; i++) {
+			if (unifDims[i] == 1) {
+				glUniform1fv(unifLocs[i], 1, (GLfloat *)node->unif);
+			}
+			else if (unifDims[i] == 2) {
+				glUniform2fv(unifLocs[i], 1, (GLfloat *)node->unif);
+			}
+			else if (unifDims[i] == 3) {
+				glUniform3fv(unifLocs[i], 1, (GLfloat *)node->unif);
+			}
+			else if (unifDims[i] == 4) {
+				glUniform4fv(unifLocs[i], 1, (GLfloat *)node->unif);
+			}
+		}
 		/* Render the mesh, the children, and the younger siblings. */
 		meshGLRender(node->meshGL, attrNum, attrDims, attrLocs);
-		fflush(stdout);
-		sceneRender(node->firstChild, toUniforms, modelingLoc, unifNum, unifDims, unifLocs,
+
+		sceneRender(node->firstChild, finalTransformation, modelingLoc, unifNum, unifDims, unifLocs,
 			attrNum, attrDims, attrLocs);
 		sceneRender(node->nextSibling, parent, modelingLoc, unifNum, unifDims, unifLocs,
 			attrNum, attrDims, attrLocs);
